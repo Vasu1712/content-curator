@@ -4,12 +4,13 @@ from pathlib import Path
 from typing import Optional
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from pydantic import BaseModel
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.graph import curator_graph
-from app.models import BundleResponse, EvaluationResult, LearnerSubmission
-from app.tools.evaluators import answer_evaluator
+from app.models import BundleResponse, EvaluationResult, ImprovedSolution, LearnerSubmission
+from app.tools.evaluators import answer_evaluator, improve_answer
 
 app = FastAPI(title="Curator Agent", version="2.0.0")
 
@@ -111,6 +112,24 @@ async def evaluate_answer(submission: LearnerSubmission):
         learner_answer=submission.answer,
     )
     return result
+
+
+class ImproveSolutionRequest(BaseModel):
+    session_id: str
+    answer: str
+
+
+@app.post("/api/improve")
+async def improve_solution(submission: ImproveSolutionRequest) -> ImprovedSolution:
+    session = _sessions.get(submission.session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found or expired.")
+    bundle = (session.get("bundle_response") or {})
+    challenge = bundle.get("dynamic_challenge", "")
+    required_output = bundle.get("required_output", "")
+    if not challenge:
+        raise HTTPException(status_code=400, detail="No challenge found in session.")
+    return improve_answer(challenge, required_output, submission.answer)
 
 
 @app.get("/api/health")

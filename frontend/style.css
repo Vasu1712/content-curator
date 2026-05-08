@@ -749,6 +749,57 @@ body {
 .eval-bar-fill.fail { background: var(--red);   box-shadow: 0 0 8px rgba(244,63,94,0.5); }
 .eval-feedback { font-size: 0.85rem; color: var(--t2); line-height: 1.65; }
 
+.eval-improve-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+.btn-improve {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid rgba(124,106,245,0.45);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.btn-improve:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-improve:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.msg-card--improve { border-color: rgba(124,106,245,0.2); }
+.improve-answer-text {
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: var(--t1);
+  white-space: pre-wrap;
+  margin-bottom: 16px;
+}
+.improve-points-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.improve-point {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  background: rgba(124,106,245,0.06);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--r-xs) var(--r-xs) 0;
+}
+.improve-point-label { font-size: 0.8rem; font-weight: 600; color: var(--accent-lt); }
+.improve-point-reason { font-size: 0.775rem; color: var(--t2); line-height: 1.5; }
+
 /* Loading indicator */
 .loading-indicator {
   display: flex;
