@@ -1,0 +1,449 @@
+/* ── Reset & Base ───────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #f5f5f5;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Screens ────────────────────────────────────────────────────── */
+.screen { width: 100%; min-height: 100vh; }
+.hidden { display: none !important; }
+
+/* ── Input Screen ───────────────────────────────────────────────── */
+.screen-input {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.canvas {
+  background: #fff;
+  border: 2px solid #1a1a1a;
+  border-radius: 16px;
+  width: min(1100px, 95vw);
+  min-height: 80vh;
+  padding: 40px 48px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+/* ── Title ──────────────────────────────────────────────────────── */
+.title {
+  font-family: 'Caveat', cursive;
+  font-size: 3rem;
+  font-weight: 700;
+  color: #111;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.title-active {
+  margin-bottom: 16px;
+  font-size: 2.4rem;
+  padding-top: 24px;
+}
+
+/* ── Hint text ──────────────────────────────────────────────────── */
+.hint-text {
+  font-family: 'Caveat', cursive;
+  font-size: 1.25rem;
+  color: #e07b00;
+  text-align: center;
+  margin: auto 0;
+  padding: 40px 0;
+  max-width: 680px;
+  line-height: 1.6;
+}
+
+/* ── Objective input ────────────────────────────────────────────── */
+.objective-wrapper {
+  width: 100%;
+  max-width: 560px;
+  margin-bottom: 32px;
+}
+
+.objective-input {
+  width: 100%;
+  border: 2px solid #3b82f6;
+  border-radius: 24px;
+  padding: 14px 22px;
+  font-family: 'Caveat', cursive;
+  font-size: 1.1rem;
+  color: #3b82f6;
+  outline: none;
+  text-align: center;
+  background: #fff;
+}
+.objective-input::placeholder { color: #93c5fd; }
+.objective-input:focus { border-color: #1d4ed8; }
+
+/* ── Bottom bar ─────────────────────────────────────────────────── */
+.bottom-bar {
+  width: 100%;
+  border: 2px solid #1a1a1a;
+  border-radius: 32px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+}
+
+.content-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: 'Caveat', cursive;
+  font-size: 1.05rem;
+  color: #333;
+  background: transparent;
+  line-height: 1.4;
+  overflow-y: hidden;
+}
+.content-input::placeholder { color: #aaa; }
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  color: #444;
+  border-radius: 50%;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.icon-btn:hover { background: #f0f0f0; }
+
+.submit-btn {
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.submit-btn:hover { background: #333; }
+.submit-btn:disabled { background: #999; cursor: not-allowed; }
+
+/* ── Active Screen ──────────────────────────────────────────────── */
+.screen-active {
+  padding: 0 24px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ── Three-column layout ────────────────────────────────────────── */
+.three-col {
+  display: grid;
+  grid-template-columns: 240px 1fr 220px;
+  gap: 20px;
+  width: min(1100px, 100%);
+  align-items: start;
+}
+
+.panel {
+  background: #fff;
+  border: 2px solid #1a1a1a;
+  border-radius: 12px;
+  padding: 20px 16px;
+  min-height: 600px;
+}
+
+.panel-heading {
+  font-family: 'Caveat', cursive;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 16px;
+}
+
+/* ── Files panel ────────────────────────────────────────────────── */
+.panel-left {}
+
+.files-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.file-chip {
+  border: 2px solid #1a1a1a;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-family: 'Caveat', cursive;
+  font-size: 1rem;
+  color: #111;
+  text-align: center;
+  background: #fff;
+  cursor: default;
+}
+
+/* ── Center chat panel ──────────────────────────────────────────── */
+.panel-center {
+  position: relative;
+}
+
+.chat-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  color: #888;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+/* ── Chat boxes ─────────────────────────────────────────────────── */
+.chat-box {
+  border: 1.5px solid #ccc;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  background: #fff;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: #222;
+}
+
+.objective-box {
+  border-color: #bbb;
+  font-family: 'Caveat', cursive;
+  font-size: 1.05rem;
+  color: #111;
+}
+
+.content-preview {
+  color: #555;
+  font-size: 0.85rem;
+}
+
+.bundle-box {
+  border-color: #bbb;
+}
+
+.box-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  color: #888;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+/* ── Challenge box ──────────────────────────────────────────────── */
+.challenge-box {
+  border-color: #bbb;
+  border-width: 1.5px;
+}
+
+.challenge-title {
+  font-family: 'Caveat', cursive;
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 10px;
+}
+
+.challenge-text {
+  font-family: 'Caveat', cursive;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.rationale-box {
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.source-snippet {
+  background: #f4f4f4;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 0.8rem;
+  color: #444;
+  margin-bottom: 12px;
+  line-height: 1.5;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.answer-input {
+  width: 100%;
+  border: 1.5px solid #ccc;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  outline: none;
+  resize: vertical;
+  margin-bottom: 10px;
+  color: #333;
+}
+.answer-input:focus { border-color: #3b82f6; }
+
+.submit-answer-btn {
+  display: block;
+  width: 100%;
+  border: 1.5px solid #1a1a1a;
+  border-radius: 8px;
+  padding: 9px;
+  background: #fff;
+  font-family: 'Caveat', cursive;
+  font-size: 1rem;
+  cursor: pointer;
+  color: #111;
+  transition: background 0.15s;
+  text-align: center;
+}
+.submit-answer-btn:hover { background: #f0f0f0; }
+.submit-answer-btn:disabled { color: #999; cursor: not-allowed; }
+
+/* ── Evaluation result ──────────────────────────────────────────── */
+.eval-box { border-color: #4ade80; }
+
+#eval-score {
+  font-size: 1.5rem;
+  font-family: 'Caveat', cursive;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+#eval-feedback {
+  font-size: 0.88rem;
+  color: #444;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+#eval-pass {
+  font-family: 'Caveat', cursive;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* ── URL panel ──────────────────────────────────────────────────── */
+.panel-right {}
+
+.urls-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.url-chip {
+  font-family: 'Caveat', cursive;
+  font-size: 0.95rem;
+  color: #333;
+  word-break: break-all;
+  padding: 4px 0;
+  border-bottom: 1px solid #eee;
+}
+
+/* ── Loading ────────────────────────────────────────────────────── */
+.loading-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 0;
+  color: #777;
+  font-size: 0.9rem;
+}
+
+.spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── URL Modal ──────────────────────────────────────────────────── */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-box {
+  background: #fff;
+  border: 2px solid #1a1a1a;
+  border-radius: 12px;
+  padding: 28px 32px;
+  width: min(420px, 92vw);
+}
+
+.modal-box h3 {
+  font-family: 'Caveat', cursive;
+  font-size: 1.4rem;
+  margin-bottom: 14px;
+}
+
+.modal-input {
+  width: 100%;
+  border: 1.5px solid #ccc;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  outline: none;
+  margin-bottom: 16px;
+}
+.modal-input:focus { border-color: #3b82f6; }
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.modal-btn {
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: 1.5px solid #1a1a1a;
+  background: #fff;
+  transition: background 0.15s;
+}
+.modal-btn-cancel:hover { background: #f3f4f6; }
+.modal-btn-add { background: #111; color: #fff; }
+.modal-btn-add:hover { background: #333; }
+
+/* ── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .three-col {
+    grid-template-columns: 1fr;
+  }
+  .panel { min-height: auto; }
+  .title { font-size: 2.2rem; }
+  .canvas { padding: 28px 20px 24px; }
+}
