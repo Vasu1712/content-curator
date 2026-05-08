@@ -1,11 +1,12 @@
 import asyncio
 import operator
+import re
+import json
 from typing import TypedDict, Annotated, Optional
 
 from langgraph.graph import StateGraph, END, START
 from langchain_ollama import OllamaLLM
 from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import JsonOutputParser
 
 from app.models import SourceDocument, BundleResponse
 from app.tools.retrieval import url_retrieval_tool, file_retrieval_tool, text_processor_tool
@@ -25,10 +26,41 @@ Rules:
 2. Make the challenge actionable and specific.
 3. Do NOT invent outside facts.
 
-{format_instructions}""",
+Respond with ONLY a JSON object — no markdown fences, no explanation, no preamble. Use exactly these keys:
+{{
+  "curated_bundle": "<key concepts extracted from the content>",
+  "dynamic_challenge": "<real-world scenario testing the objective>",
+  "rationale": "<why this challenge fits the content and objective>",
+  "required_output": "<exactly what the learner needs to submit>"
+}}""",
     input_variables=["objective", "context"],
-    partial_variables={},
 )
+
+
+def _flatten_to_str(v) -> str:
+    if isinstance(v, str):
+        return v
+    if isinstance(v, dict):
+        for key in ("description", "text", "content", "output_format", "title"):
+            if key in v and isinstance(v[key], str):
+                return v[key]
+        return " ".join(str(vv) for vv in v.values() if vv)
+    if isinstance(v, list):
+        return " ".join(str(item) for item in v if item)
+    return str(v)
+
+
+def _parse_bundle(raw: str) -> dict:
+    raw = re.sub(r"```(?:json)?", "", raw).strip()
+    match = re.search(r"\{.*\}", raw, re.DOTALL)
+    if not match:
+        raise ValueError(f"No JSON object found in LLM output: {raw[:200]}")
+    data = json.loads(match.group())
+    required = {"curated_bundle", "dynamic_challenge", "rationale", "required_output"}
+    missing = required - data.keys()
+    if missing:
+        raise ValueError(f"Missing keys in LLM output: {missing}")
+    return {k: (_flatten_to_str(data[k]) if k in required else data[k]) for k in data}
 
 
 class CuratorState(TypedDict):
@@ -118,29 +150,21 @@ def _route_by_strategy(state: CuratorState) -> str:
 
 async def direct_llm_node(state: CuratorState) -> dict:
     llm = OllamaLLM(model="llama3", temperature=0.1)
-    parser = JsonOutputParser(pydantic_object=BundleResponse)
-    prompt = _GENERATION_PROMPT.partial(
-        format_instructions=parser.get_format_instructions()
-    )
-    chain = prompt | llm | parser
+    chain = _GENERATION_PROMPT | llm
     context = state.get("aggregated_content", "")
     try:
-        result = await asyncio.get_event_loop().run_in_executor(
+        raw = await asyncio.get_event_loop().run_in_executor(
             None,
             lambda: chain.invoke({"objective": state["learning_objective"], "context": context}),
         )
-        return {"bundle_response": result, "retrieved_context": context}
+        return {"bundle_response": _parse_bundle(raw), "retrieved_context": context}
     except Exception as e:
         return {"error": f"PARSE_ERROR: {e}"}
 
 
 async def qdrant_rag_node(state: CuratorState) -> dict:
     llm = OllamaLLM(model="llama3", temperature=0.1)
-    parser = JsonOutputParser(pydantic_object=BundleResponse)
-    prompt = _GENERATION_PROMPT.partial(
-        format_instructions=parser.get_format_instructions()
-    )
-    chain = prompt | llm | parser
+    chain = _GENERATION_PROMPT | llm
     try:
         loop = asyncio.get_event_loop()
         context = await loop.run_in_executor(
@@ -150,22 +174,18 @@ async def qdrant_rag_node(state: CuratorState) -> dict:
         )
         if not context.strip():
             return {"error": "NO_RELEVANT_CONTEXT"}
-        result = await loop.run_in_executor(
+        raw = await loop.run_in_executor(
             None,
             lambda: chain.invoke({"objective": state["learning_objective"], "context": context}),
         )
-        return {"bundle_response": result, "retrieved_context": context}
+        return {"bundle_response": _parse_bundle(raw), "retrieved_context": context}
     except Exception as e:
         return {"error": str(e)}
 
 
 async def neo4j_rag_node(state: CuratorState) -> dict:
     llm = OllamaLLM(model="llama3", temperature=0.1)
-    parser = JsonOutputParser(pydantic_object=BundleResponse)
-    prompt = _GENERATION_PROMPT.partial(
-        format_instructions=parser.get_format_instructions()
-    )
-    chain = prompt | llm | parser
+    chain = _GENERATION_PROMPT | llm
     try:
         loop = asyncio.get_event_loop()
         context = await loop.run_in_executor(
@@ -175,11 +195,11 @@ async def neo4j_rag_node(state: CuratorState) -> dict:
         )
         if not context.strip():
             return {"error": "NO_RELEVANT_CONTEXT"}
-        result = await loop.run_in_executor(
+        raw = await loop.run_in_executor(
             None,
             lambda: chain.invoke({"objective": state["learning_objective"], "context": context}),
         )
-        return {"bundle_response": result, "retrieved_context": context}
+        return {"bundle_response": _parse_bundle(raw), "retrieved_context": context}
     except Exception as e:
         return {"error": str(e)}
 
