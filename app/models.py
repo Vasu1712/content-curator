@@ -31,3 +31,13 @@ class EvaluationResult(BaseModel):
     score: float = Field(..., description="Score from 0.0 to 1.0")
     feedback: str = Field(..., description="Detailed feedback on the answer")
     passed: bool = Field(..., description="Whether the learner passed")
+
+
+class ImprovementPoint(BaseModel):
+    point: str = Field(..., description="What was improved")
+    reason: str = Field(..., description="Why this improvement matters")
+
+
+class ImprovedSolution(BaseModel):
+    improved_answer: str = Field(..., description="The full improved answer")
+    improvements: List[ImprovementPoint] = Field(..., description="List of specific improvements made")

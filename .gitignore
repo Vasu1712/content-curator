@@ -4,6 +4,9 @@ __pycache__/
 *$py.class
 
 architecture.md
+evaluation.md
+product.md
+ai-usage.md
 
 # C extensions
 *.so

@@ -54,6 +54,11 @@ const evalScoreFill     = document.getElementById('eval-score-fill');
 const loadingBox        = document.getElementById('loading-box');
 const loadingText       = document.getElementById('loading-text');
 
+const btnImprove        = document.getElementById('btn-improve');
+const improveBox        = document.getElementById('improve-box');
+const improveAnswer     = document.getElementById('improve-answer');
+const improvePoints     = document.getElementById('improve-points');
+
 const strategyBadge     = document.getElementById('strategy-badge');
 const btnNewSession     = document.getElementById('btn-new-session');
 const attachmentChips   = document.getElementById('attachment-chips');
@@ -76,6 +81,10 @@ function revealCard(el) {
 function hideCard(el) {
   el.classList.add('hidden');
   el.classList.remove('visible');
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 function extractDomain(url) {
@@ -357,6 +366,7 @@ async function submitCuration() {
   hideCard(curatedBundleBox);
   hideCard(challengeBox);
   hideCard(evalResultBox);
+  hideCard(improveBox);
   hide(strategyBadge);
 
   objectiveBox.querySelector('.msg-objective-text').textContent = objective;
@@ -501,11 +511,46 @@ function renderEvaluation(result) {
 
   evalResultBox.className = `msg-card msg-card--eval ${passed ? 'eval-pass' : 'eval-fail'}`;
 
+  btnImprove.classList.add('hidden');
   revealCard(evalResultBox);
   setTimeout(() => evalResultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 420);
+  setTimeout(() => btnImprove.classList.remove('hidden'), 5000);
 
   toast(passed ? 'Great work — challenge passed! 🎉' : 'Not quite — review the feedback and try again.', passed ? 'success' : 'info');
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   IMPROVED SOLUTION
+═══════════════════════════════════════════════════════════════════ */
+btnImprove.addEventListener('click', async () => {
+  btnImprove.disabled = true;
+  btnImprove.textContent = 'Generating…';
+  try {
+    const res = await fetch('/api/improve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_id: state.sessionId, answer: answerInput.value.trim() }),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    improveAnswer.textContent = data.improved_answer;
+    improvePoints.innerHTML = '';
+    (data.improvements || []).forEach(imp => {
+      const li = document.createElement('li');
+      li.className = 'improve-point';
+      li.innerHTML = `<span class="improve-point-label">${escapeHtml(imp.point)}</span>
+                      <span class="improve-point-reason">${escapeHtml(imp.reason)}</span>`;
+      improvePoints.appendChild(li);
+    });
+    revealCard(improveBox);
+    setTimeout(() => improveBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 420);
+  } catch {
+    toast('Could not generate improved solution', 'error');
+    btnImprove.disabled = false;
+    btnImprove.textContent = 'Improved Solution ↑';
+  }
+});
 
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -527,6 +572,10 @@ btnNewSession.addEventListener('click', () => {
   show(composerHint);
 
   updateAttachmentChips();
+
+  hideCard(improveBox);
+  btnImprove.disabled = false;
+  btnImprove.textContent = 'Improved Solution ↑';
 
   hide(screenActive);
   show(screenInput);
